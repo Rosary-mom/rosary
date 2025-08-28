@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Daily Green Exposure Estimator</title>
+    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico"> <!-- Favicon im <head> -->
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
+        label { display: block; margin: 10px 0; }
+        button { padding: 5px 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; font-weight: bold; color: #006600; }
     </style>
 </head>
 <body>
@@ -21,24 +25,43 @@
             const bbox = `${lat-0.01},${lon-0.01},${lat+0.01},${lon+0.01}`;
             const query = `[out:json][timeout:25];way["leisure"="park"](${bbox});out count;`;
             const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-            const response = await fetch(url);
-            const result = await response.json();
-            return result.elements ? result.elements[0]?.tags?.ways || 0 : 0;
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                console.log('OSM Result:', result); // Debug: Öffnen Sie F12 für Console
+                return result.elements ? result.elements[0]?.tags?.ways || 0 : 0;
+            } catch (error) {
+                console.error('OSM Error:', error);
+                return 0;
+            }
         }
 
         async function getWeather(lat, lon) {
-            const apiKey =  035e68e3800487033e1042ee082a96f9 ; // Ersetzen Sie mit Ihrem API-Schlüssel
+            const apiKey = 'YOUR_OPENWEATHERMAP_API_KEY'; // Ersetzen Sie mit Ihrem Schlüssel!
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-            const response = await fetch(url);
-            const data = await response.json();
-            return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable';
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('Weather Result:', data); // Debug
+                return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable (check API key)';
+            } catch (error) {
+                console.error('Weather Error:', error);
+                return 'Weather error: Check console (F12)';
+            }
         }
 
         function estimateExposure() {
-            const walk = parseFloat(document.getElementById('walk').value);
-            const bike = parseFloat(document.getElementById('bike').value);
+            const walk = parseFloat(document.getElementById('walk').value) || 0;
+            const bike = parseFloat(document.getElementById('bike').value) || 0;
             const lat = parseFloat(document.getElementById('lat').value);
             const lon = parseFloat(document.getElementById('lon').value);
+
+            if (isNaN(lat) || isNaN(lon)) {
+                document.getElementById('result').innerHTML = 'Error: Invalid coordinates!';
+                return;
+            }
+
+            document.getElementById('result').innerHTML = 'Loading...';
 
             Promise.all([getOsmGreenAreas(lat, lon), getWeather(lat, lon)]).then(([greenAreas, weather]) => {
                 const exposureHours = ((walk + bike) / 5) * (greenAreas / 10);
@@ -46,6 +69,9 @@
                 document.getElementById('result').innerHTML = `Green Exposure: ${exposureHours.toFixed(2)} hours<br>
                     Health Benefit: ${benefit}%<br>
                     Current Weather: ${weather}`;
+            }).catch(error => {
+                console.error('Promise Error:', error);
+                document.getElementById('result').innerHTML = 'Error loading data. Check console (F12).';
             });
         }
     </script>
