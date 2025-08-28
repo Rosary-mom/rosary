@@ -1,0 +1,32 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_mobility_impact(distances, modes):
+    co2 = []
+    for mode in modes:
+        emissions = {
+            'car': 120,
+            'bus': 89,
+            'bike': 0
+        }.get(mode, 0)
+        co2.append([emissions * d for d in distances])
+    
+    x = np.array(distances)
+    width = 0.2
+    fig, ax = plt.subplots()
+    for i, mode in enumerate(modes):
+        ax.bar(x + i*width, co2[i], width, label=mode)
+    
+    ax.set_ylabel('CO2-Emissionen (g)')
+    ax.set_title('CO2-Auswirkungen nach Mobilitätsmodus')
+    ax.set_xticks(x + width)
+    ax.set_xticklabels(distances)
+    ax.legend()
+    plt.savefig('mobility_impact.png')  # Speichert als Bild für App-Integration
+    return 'Diagramm generiert (Beschreibung: Balkendiagramm zeigt CO2-Emissionen für Modi über Distanzen)'
+
+# Beispielaufruf
+distances = [5, 10, 20]  # Distanzen in km
+modes = ['car', 'bus', 'bike']
+result = plot_mobility_impact(distances, modes)
+print(result)
