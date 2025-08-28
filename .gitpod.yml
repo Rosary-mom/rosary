@@ -1,0 +1,13 @@
+tasks:
+  - init: |
+      echo "Starting Gitpod environment for Green Health in Mobility"
+      npm install -g http-server
+    command: |
+      http-server -p 8080
+vscode:
+  extensions:
+    - dbaeumer.vscode-eslint
+    - esbenp.prettier-vscode
+ports:
+  - port: 8080
+    onOpen: open-browser
