@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Green Mobility Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Green Mobility Visualizer</h2>
+    <label>Lat: <input type="number" id="lat" step="0.0001" value="52.5200"></label>
+    <label>Lon: <input type="number" id="lon" step="0.0001" value="13.4050"></label>
+    <button onclick="visualize()">Visualize</button>
+    <canvas id="chart" width="400" height="200"></canvas>
+    <p id="greenInfo"></p>
+
+    <script>
+        async function getOsmGreenAreas(lat, lon) {
+            const bbox = `${lat-0.01},${lon-0.01},${lat+0.01},${lon+0.01}`;
+            const query = `[out:json][timeout:25];way["leisure"="park"](${bbox});out count;`;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            const result = await response.json();
+            return result.elements ? result.elements[0]?.tags?.ways || 0 : 0;
+        }
+
+        function visualize() {
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+            const distances = [5, 10, 20];
+            const modes = ['car', 'bus', 'bike'];
+            const co2 = modes.map(m => distances.map(d => ({'car':120, 'bus':89, 'bike':0}[m] * d)));
+
+            getOsmGreenAreas(lat, lon).then(greenAreas => {
+                const ctx = document.getElementById('chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: distances,
+                        datasets: modes.map((m, i) => ({
+                            label: m,
+                            data: co2[i],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'][i]
+                        }))
+                    },
+                    options: { scales: { y: { beginAtZero: true, title: { display: true, text: 'CO2 (g)' } } } }
+                });
+                document.getElementById('greenInfo').innerHTML = `Nearby Green Areas: ${greenAreas}`;
+            });
+        }
+    </script>
+</body>
+</html>
