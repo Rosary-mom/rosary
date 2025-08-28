@@ -1,0 +1,34 @@
+import math
+
+def calculate_co2_savings(distance_km, mode_from='car', mode_to='bike'):
+    # CO2-Emissionen in g/km (basierend auf Durchschnittswerten)
+    emissions = {
+        'car': 120,  # Durchschnittliches Benzin-Auto
+        'bus': 89,
+        'train': 41,
+        'bike': 0,
+        'walk': 0
+    }
+    co2_from = emissions.get(mode_from, 120) * distance_km
+    co2_to = emissions.get(mode_to, 0) * distance_km
+    return co2_from - co2_to
+
+def calculate_calories_burned(distance_km, mode='bike', weight_kg=70):
+    # MET-Werte für metabolische Äquivalente
+    mets = {
+        'bike': 8.0,
+        'walk': 3.5
+    }
+    met = mets.get(mode, 8.0)
+    # Annahme: Geschwindigkeit Bike 15 km/h, Walk 5 km/h
+    time_hours = distance_km / (15 if mode == 'bike' else 5)
+    calories = met * weight_kg * time_hours
+    return calories
+
+# Beispielaufruf
+dist = 10  # Distanz in km
+savings = calculate_co2_savings(dist, 'car', 'bike')
+calories = calculate_calories_burned(dist, 'bike')
+print(f'Für {dist} km Wechsel von Auto zu Fahrrad:')
+print(f'CO2-Einsparung: {savings} g')
+print(f'Verbrannte Kalorien: {calories:.2f} kcal')
