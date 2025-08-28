@@ -1,13 +1,53 @@
-def estimate_green_exposure(walk_km, bike_km, green_percentage=0.5, stress_reduction_per_km=10):
-    # Annahme: 50% der Strecke in grünen Bereichen; Stressreduktion in % pro km
-    total_active_km = walk_km + bike_km
-    green_exposure_hours = (total_active_km * green_percentage) / 5  # Annahme: 5 km/h Geschwindigkeit
-    health_benefit = total_active_km * stress_reduction_per_km  # Vereinfachte Metrik
-    return green_exposure_hours, health_benefit
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Green Exposure Estimator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Daily Green Exposure Estimator</h2>
+    <label>Walk (km): <input type="number" id="walk" value="3"></label>
+    <label>Bike (km): <input type="number" id="bike" value="5"></label>
+    <label>Lat: <input type="number" id="lat" step="0.0001" value="52.5200"></label>
+    <label>Lon: <input type="number" id="lon" step="0.0001" value="13.4050"></label>
+    <button onclick="estimateExposure()">Estimate</button>
+    <p id="result"></p>
 
-# Beispielaufruf
-walk = 3  # km zu Fuß
-bike = 5  # km mit Fahrrad
-exposure, benefit = estimate_green_exposure(walk, bike)
-print(f'Tägliche Grün-Exposition: {exposure:.2f} Stunden')
-print(f'Gesundheitsvorteil (Stressreduktion): {benefit}%')
+    <script>
+        async function getOsmGreenAreas(lat, lon) {
+            const bbox = `${lat-0.01},${lon-0.01},${lat+0.01},${lon+0.01}`;
+            const query = `[out:json][timeout:25];way["leisure"="park"](${bbox});out count;`;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            const result = await response.json();
+            return result.elements ? result.elements[0]?.tags?.ways || 0 : 0;
+        }
+
+        async function getWeather(lat, lon) {
+            const apiKey =  035e68e3800487033e1042ee082a96f9 ; // Ersetzen Sie mit Ihrem API-Schlüssel
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable';
+        }
+
+        function estimateExposure() {
+            const walk = parseFloat(document.getElementById('walk').value);
+            const bike = parseFloat(document.getElementById('bike').value);
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+
+            Promise.all([getOsmGreenAreas(lat, lon), getWeather(lat, lon)]).then(([greenAreas, weather]) => {
+                const exposureHours = ((walk + bike) / 5) * (greenAreas / 10);
+                const benefit = (walk + bike) * 10;
+                document.getElementById('result').innerHTML = `Green Exposure: ${exposureHours.toFixed(2)} hours<br>
+                    Health Benefit: ${benefit}%<br>
+                    Current Weather: ${weather}`;
+            });
+        }
+    </script>
+</body>
+</html>
