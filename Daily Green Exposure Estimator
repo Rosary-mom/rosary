@@ -1,0 +1,13 @@
+def estimate_green_exposure(walk_km, bike_km, green_percentage=0.5, stress_reduction_per_km=10):
+    # Annahme: 50% der Strecke in grünen Bereichen; Stressreduktion in % pro km
+    total_active_km = walk_km + bike_km
+    green_exposure_hours = (total_active_km * green_percentage) / 5  # Annahme: 5 km/h Geschwindigkeit
+    health_benefit = total_active_km * stress_reduction_per_km  # Vereinfachte Metrik
+    return green_exposure_hours, health_benefit
+
+# Beispielaufruf
+walk = 3  # km zu Fuß
+bike = 5  # km mit Fahrrad
+exposure, benefit = estimate_green_exposure(walk, bike)
+print(f'Tägliche Grün-Exposition: {exposure:.2f} Stunden')
+print(f'Gesundheitsvorteil (Stressreduktion): {benefit}%')
