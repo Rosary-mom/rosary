@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mobility Impact Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, button { margin: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Mobility Impact Calculator</h2>
+    <label>Start Lat: <input type="number" id="startLat" step="0.0001" value="52.5200"></label>
+    <label>Start Lon: <input type="number" id="startLon" step="0.0001" value="13.4050"></label>
+    <label>End Lat: <input type="number" id="endLat" step="0.0001" value="52.5163"></label>
+    <label>End Lon: <input type="number" id="endLon" step="0.0001" value="13.3777"></label>
+    <label>Weight (kg): <input type="number" id="weight" value="70"></label>
+    <button onclick="calculateImpact()">Calculate</button>
+    <p id="result"></p>
+
+    <script>
+        async function getOsmBikeRouteLength(startLat, startLon, endLat, endLon) {
+            const bbox = `${Math.min(startLat, endLat)-0.01},${Math.min(startLon, endLon)-0.01},${Math.max(startLat, endLat)+0.01},${Math.max(startLon, endLon)+0.01}`;
+            const query = `[out:json][timeout:25];way["highway"="cycleway"](${bbox});out geom;`;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            const result = await response.json();
+            let totalLengthKm = 0;
+            if (result.elements) {
+                for (let elem of result.elements) {
+                    if (elem.geometry) {
+                        for (let i = 1; i < elem.geometry.length; i++) {
+                            const lat1 = elem.geometry[i-1].lat, lon1 = elem.geometry[i-1].lon;
+                            const lat2 = elem.geometry[i].lat, lon2 = elem.geometry[i].lon;
+                            const R = 6371;
+                            const dLat = Math.radians(lat2 - lat1);
+                            const dLon = Math.radians(lon2 - lon1);
+                            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(Math.radians(lat1)) * Math.cos(Math.radians(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                            totalLengthKm += R * c;
+                        }
+                    }
+                }
+            }
+            return totalLengthKm;
+        }
+
+        Math.radians = function(degrees) { return degrees * Math.PI / 180; };
+
+        function calculateImpact() {
+            const startLat = parseFloat(document.getElementById('startLat').value);
+            const startLon = parseFloat(document.getElementById('startLon').value);
+            const endLat = parseFloat(document.getElementById('endLat').value);
+            const endLon = parseFloat(document.getElementById('endLon').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+
+            getOsmBikeRouteLength(startLat, startLon, endLat, endLon).then(distance => {
+                const co2Saved = (120 - 0) * distance; // Car to Bike
+                const calories = 8.0 * weight * (distance / 15); // Bike MET
+                const points = Math.floor(co2Saved / 100);
+                const level = Math.floor(points / 100);
+                const badge = points >= 500 ? 'Eco-Warrior' : 'Green Starter';
+
+                document.getElementById('result').innerHTML = `Distance: ${distance.toFixed(2)} km<br>
+                    CO2 Saved: ${co2Saved.toFixed(0)} g<br>
+                    Calories Burned: ${calories.toFixed(2)} kcal<br>
+                    Eco-Points: ${points}, Level: ${level}, Badge: ${badge}`;
+            });
+        }
+    </script>
+</body>
+</html>
