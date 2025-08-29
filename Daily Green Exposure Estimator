@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Daily Green Exposure Estimator, powered by ROSARY©®™ </title>
-    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico"> <!-- Korrigiert: Im <head> -->
+    <title>Daily Green Exposure Estimator</title>
+    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico">
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         label { display: block; margin: 10px 0; }
@@ -39,15 +39,12 @@
         }
 
         async function getWeather(lat, lon) {
-            const apiKey = '035e68e3800487033e1042ee082a96f9'; // Korrigierter Key (0 statt O)
+            const apiKey = '035e68e3800487033e1042ee082a96f9'; // Korrigiert: Als String mit quotes und '0' statt 'O'
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 console.log('Weather Result:', data); // Debug
-                if (data.cod === 401) {
-                    return 'Invalid API key – check console for details';
-                }
                 return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable';
             } catch (error) {
                 console.error('Weather Error:', error);
