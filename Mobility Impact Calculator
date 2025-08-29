@@ -1,34 +1,88 @@
-import math
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mobility Impact Calculator</title>
+    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        label { display: block; margin: 10px 0; }
+        button { padding: 5px 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        #result, #gamification { margin-top: 20px; font-weight: bold; color: #006600; }
+    </style>
+</head>
+<body>
+    <h2>Mobility Impact Calculator</h2>
+    <label>Start Lat: <input type="number" id="startLat" step="0.0001" value="52.5200"></label>
+    <label>Start Lon: <input type="number" id="startLon" step="0.0001" value="13.4050"></label>
+    <label>End Lat: <input type="number" id="endLat" step="0.0001" value="52.5163"></label>
+    <label>End Lon: <input type="number" id="endLon" step="0.0001" value="13.3777"></label>
+    <label>Weight (kg): <input type="number" id="weight" value="70"></label>
+    <button onclick="calculateImpact()">Calculate</button>
+    <p id="result"></p>
+    <p id="gamification"></p>
 
-def calculate_co2_savings(distance_km, mode_from='car', mode_to='bike'):
-    # CO2-Emissionen in g/km (basierend auf Durchschnittswerten)
-    emissions = {
-        'car': 120,  # Durchschnittliches Benzin-Auto
-        'bus': 89,
-        'train': 41,
-        'bike': 0,
-        'walk': 0
-    }
-    co2_from = emissions.get(mode_from, 120) * distance_km
-    co2_to = emissions.get(mode_to, 0) * distance_km
-    return co2_from - co2_to
+    <script>
+        let totalPoints = 0;
 
-def calculate_calories_burned(distance_km, mode='bike', weight_kg=70):
-    # MET-Werte für metabolische Äquivalente
-    mets = {
-        'bike': 8.0,
-        'walk': 3.5
-    }
-    met = mets.get(mode, 8.0)
-    # Annahme: Geschwindigkeit Bike 15 km/h, Walk 5 km/h
-    time_hours = distance_km / (15 if mode == 'bike' else 5)
-    calories = met * weight_kg * time_hours
-    return calories
+        async function getOsmBikeRouteLength(startLat, startLon, endLat, endLon) {
+            const bbox = `${Math.min(startLat, endLat)-0.01},${Math.min(startLon, endLon)-0.01},${Math.max(startLat, endLat)+0.01},${Math.max(startLon, endLon)+0.01}`;
+            const query = `[out:json][timeout:25];way["highway"="cycleway"](${bbox});out geom;`;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                console.log('OSM Result:', result); // Debug
+                let totalLengthKm = 0;
+                if (result.elements) {
+                    for (let elem of result.elements) {
+                        if (elem.geometry) {
+                            for (let i = 1; i < elem.geometry.length; i++) {
+                                const lat1 = elem.geometry[i-1].lat, lon1 = elem.geometry[i-1].lon;
+                                const lat2 = elem.geometry[i].lat, lon2 = elem.geometry[i].lon;
+                                const R = 6371;
+                                const dLat = (lat2 - lat1) * Math.PI / 180;
+                                const dLon = (lon2 - lon1) * Math.PI / 180;
+                                const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                                totalLengthKm += R * c;
+                            }
+                        }
+                    }
+                }
+                return totalLengthKm;
+            } catch (error) {
+                console.error('OSM Error:', error);
+                return 0;
+            }
+        }
 
-# Beispielaufruf
-dist = 10  # Distanz in km
-savings = calculate_co2_savings(dist, 'car', 'bike')
-calories = calculate_calories_burned(dist, 'bike')
-print(f'Für {dist} km Wechsel von Auto zu Fahrrad:')
-print(f'CO2-Einsparung: {savings} g')
-print(f'Verbrannte Kalorien: {calories:.2f} kcal')
+        function calculateImpact() {
+            const startLat = parseFloat(document.getElementById('startLat').value);
+            const startLon = parseFloat(document.getElementById('startLon').value);
+            const endLat = parseFloat(document.getElementById('endLat').value);
+            const endLon = parseFloat(document.getElementById('endLon').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+
+            document.getElementById('result').innerHTML = 'Loading...';
+
+            getOsmBikeRouteLength(startLat, startLon, endLat, endLon).then(distance => {
+                const co2Saved = (120 - 0) * distance;
+                const calories = 8.0 * weight * (distance / 15);
+                const points = Math.floor(co2Saved / 100);
+                totalPoints += points;
+                const level = Math.floor(totalPoints / 100);
+                const badge = totalPoints >= 500 ? 'Eco-Warrior' : 'Green Starter';
+
+                document.getElementById('result').innerHTML = `Distance: ${distance.toFixed(2)} km<br>
+                    CO2 Saved: ${co2Saved.toFixed(0)} g<br>
+                    Calories Burned: ${calories.toFixed(2)} kcal`;
+                document.getElementById('gamification').innerHTML = `Total Points: ${totalPoints}, Level: ${level}, Badge: ${badge}`;
+            }).catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'Error loading data. Check console (F12).';
+            });
+        }
+    </script>
+</body>
+</html>
