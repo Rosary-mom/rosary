@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Daily Green Exposure Estimator, by ROSARY ©®™ </title>
+    <title>Daily Green Exposure Estimator, by ROSARY ©®™, 2025 ff  </title>
     <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico"> <!-- Korrigiert: Im <head> -->
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
@@ -39,7 +39,7 @@
         }
 
         async function getWeather(lat, lon) {
-            const apiKey = "035e68e3800487033e1042ee082a96f9"; // Korrigiert: Mit Quotes und '0' statt 'O'
+            const apiKey = ´035e68e3800487033e1042ee082a96f9 `; // Korrigiert: Mit Quotes und '0' statt 'O'
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
             try {
                 const response = await fetch(url);
