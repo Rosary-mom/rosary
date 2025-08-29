@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Daily Green Exposure Estimator</title>
-    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico"> <!-- Favicon im <head> -->
+    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico"> <!-- Favicon-Link -->
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         label { display: block; margin: 10px 0; }
@@ -21,6 +21,8 @@
     <p id="result"></p>
 
     <script>
+        let totalPoints = 0; // Für Gamification
+
         async function getOsmGreenAreas(lat, lon) {
             const bbox = `${lat-0.01},${lon-0.01},${lat+0.01},${lon+0.01}`;
             const query = `[out:json][timeout:25];way["leisure"="park"](${bbox});out count;`;
@@ -37,13 +39,13 @@
         }
 
         async function getWeather(lat, lon) {
-            const apiKey = 'YOUR_OPENWEATHERMAP_API_KEY'; // Ersetzen Sie mit Ihrem Schlüssel!
+            const apiKey = '035e68e3800487033e1042ee082a96f9'; // Dein API-Schlüssel
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 console.log('Weather Result:', data); // Debug
-                return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable (check API key)';
+                return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable (check API key or coordinates)';
             } catch (error) {
                 console.error('Weather Error:', error);
                 return 'Weather error: Check console (F12)';
@@ -66,9 +68,14 @@
             Promise.all([getOsmGreenAreas(lat, lon), getWeather(lat, lon)]).then(([greenAreas, weather]) => {
                 const exposureHours = ((walk + bike) / 5) * (greenAreas / 10);
                 const benefit = (walk + bike) * 10;
+                totalPoints += (walk + bike) * 5; // Gamification: 5 Punkte pro km
+                const level = Math.floor(totalPoints / 100);
+                const badge = totalPoints >= 200 ? 'Eco-Hero' : 'Green Explorer';
+
                 document.getElementById('result').innerHTML = `Green Exposure: ${exposureHours.toFixed(2)} hours<br>
                     Health Benefit: ${benefit}%<br>
-                    Current Weather: ${weather}`;
+                    Current Weather: ${weather}<br>
+                    Points: ${totalPoints}, Level: ${level}, Badge: ${badge}`;
             }).catch(error => {
                 console.error('Promise Error:', error);
                 document.getElementById('result').innerHTML = 'Error loading data. Check console (F12).';
