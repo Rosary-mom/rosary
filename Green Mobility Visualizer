@@ -1,32 +1,67 @@
-import matplotlib.pyplot as plt
-import numpy as np
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Green Mobility Visualizer</title>
+    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        label { display: block; margin: 10px 0; }
+        button { padding: 5px 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Green Mobility Visualizer</h2>
+    <label>Lat: <input type="number" id="lat" step="0.0001" value="52.5200"></label>
+    <label>Lon: <input type="number" id="lon" step="0.0001" value="13.4050"></label>
+    <button onclick="visualize()">Visualize</button>
+    <canvas id="chart" width="400" height="200"></canvas>
+    <p id="greenInfo"></p>
 
-def plot_mobility_impact(distances, modes):
-    co2 = []
-    for mode in modes:
-        emissions = {
-            'car': 120,
-            'bus': 89,
-            'bike': 0
-        }.get(mode, 0)
-        co2.append([emissions * d for d in distances])
-    
-    x = np.array(distances)
-    width = 0.2
-    fig, ax = plt.subplots()
-    for i, mode in enumerate(modes):
-        ax.bar(x + i*width, co2[i], width, label=mode)
-    
-    ax.set_ylabel('CO2-Emissionen (g)')
-    ax.set_title('CO2-Auswirkungen nach Mobilitätsmodus')
-    ax.set_xticks(x + width)
-    ax.set_xticklabels(distances)
-    ax.legend()
-    plt.savefig('mobility_impact.png')  # Speichert als Bild für App-Integration
-    return 'Diagramm generiert (Beschreibung: Balkendiagramm zeigt CO2-Emissionen für Modi über Distanzen)'
+    <script>
+        async function getOsmGreenAreas(lat, lon) {
+            const bbox = `${lat-0.01},${lon-0.01},${lat+0.01},${lon+0.01}`;
+            const query = `[out:json][timeout:25];way["leisure"="park"](${bbox});out count;`;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                console.log('OSM Result:', result); // Debug
+                return result.elements ? result.elements[0]?.tags?.ways || 0 : 0;
+            } catch (error) {
+                console.error('OSM Error:', error);
+                return 0;
+            }
+        }
 
-# Beispielaufruf
-distances = [5, 10, 20]  # Distanzen in km
-modes = ['car', 'bus', 'bike']
-result = plot_mobility_impact(distances, modes)
-print(result)
+        function visualize() {
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+            const distances = [5, 10, 20];
+            const modes = ['car', 'bus', 'bike'];
+            const co2 = modes.map(m => distances.map(d => ({'car':120, 'bus':89, 'bike':0}[m] * d)));
+
+            getOsmGreenAreas(lat, lon).then(greenAreas => {
+                const ctx = document.getElementById('chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: distances,
+                        datasets: modes.map((m, i) => ({
+                            label: m,
+                            data: co2[i],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'][i]
+                        }))
+                    },
+                    options: { scales: { y: { beginAtZero: true, title: { display: true, text: 'CO2 (g)' } } } }
+                });
+                document.getElementById('greenInfo').innerHTML = `Nearby Green Areas: ${greenAreas}`;
+            }).catch(error => {
+                console.error('Error:', error);
+                document.getElementById('greenInfo').innerHTML = 'Error loading data. Check console (F12).';
+            });
+        }
+    </script>
+</body>
+</html>
