@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Daily Green Exposure Estimator, ROSARY©®™, 2025 ff </title>
-    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico"> <!-- Favicon-Link -->
+    <title>Daily Green Exposure Estimator</title>
+    <link rel="icon" type="image/x-icon" href="/rosary/favicon.ico">
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         label { display: block; margin: 10px 0; }
@@ -21,7 +21,7 @@
     <p id="result"></p>
 
     <script>
-        let totalPoints = 0; // Für Gamification
+        let totalPoints = 0;
 
         async function getOsmGreenAreas(lat, lon) {
             const bbox = `${lat-0.01},${lon-0.01},${lat+0.01},${lon+0.01}`;
@@ -30,7 +30,7 @@
             try {
                 const response = await fetch(url);
                 const result = await response.json();
-                console.log('OSM Result:', result); // Debug: Öffnen Sie F12 für Console
+                console.log('OSM Result:', result);
                 return result.elements ? result.elements[0]?.tags?.ways || 0 : 0;
             } catch (error) {
                 console.error('OSM Error:', error);
@@ -39,16 +39,16 @@
         }
 
         async function getWeather(lat, lon) {
-            const apiKey = '035e68e3800487033e1042ee082a96f9'; // Dein API-Schlüssel
+            const apiKey = '035e68e3800487033e1042ee082a96f9';
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                console.log('Weather Result:', data); // Debug
-                return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable (check API key or coordinates)';
+                console.log('Weather Result:', data);
+                return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable';
             } catch (error) {
                 console.error('Weather Error:', error);
-                return 'Weather error: Check console (F12)';
+                return 'Weather error';
             }
         }
 
@@ -68,7 +68,7 @@
             Promise.all([getOsmGreenAreas(lat, lon), getWeather(lat, lon)]).then(([greenAreas, weather]) => {
                 const exposureHours = ((walk + bike) / 5) * (greenAreas / 10);
                 const benefit = (walk + bike) * 10;
-                totalPoints += (walk + bike) * 5; // Gamification: 5 Punkte pro km
+                totalPoints += (walk + bike) * 5;
                 const level = Math.floor(totalPoints / 100);
                 const badge = totalPoints >= 200 ? 'Eco-Hero' : 'Green Explorer';
 
@@ -77,8 +77,8 @@
                     Current Weather: ${weather}<br>
                     Points: ${totalPoints}, Level: ${level}, Badge: ${badge}`;
             }).catch(error => {
-                console.error('Promise Error:', error);
-                document.getElementById('result').innerHTML = 'Error loading data. Check console (F12).';
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'Error: Check console (F12)';
             });
         }
     </script>
