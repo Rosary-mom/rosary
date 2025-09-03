@@ -25,30 +25,16 @@
 
         async function getOsmGreenAreas(lat, lon) {
             const bbox = `${lat-0.01},${lon-0.01},${lat+0.01},${lon+0.01}`;
-            const query = `[out:json][timeout:25];way["leisure"="park"](${bbox});out count;`;
+            const query = `[out:json][timeout:25];nwr["leisure"="park"](${bbox});out count;`;
             const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
             try {
                 const response = await fetch(url);
                 const result = await response.json();
                 console.log('OSM Result:', result); // Debug: Öffne F12 > Console
-                return result.elements ? result.elements[0]?.tags?.ways || 0 : 0;
+                return parseInt(result.elements?.[0]?.tags?.total || 0);
             } catch (error) {
                 console.error('OSM Error:', error);
                 return 0;
-            }
-        }
-
-        async function getWeather(lat, lon) {
-            const apiKey = '035e68e3800487033e1042ee082a96f9';
-            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                console.log('Weather Result:', data); // Debug
-                return data.main ? `${data.main.temp}°C, ${data.weather[0].description}` : 'Weather unavailable';
-            } catch (error) {
-                console.error('Weather Error:', error);
-                return 'Weather error: Check console (F12)';
             }
         }
 
@@ -65,7 +51,7 @@
 
             document.getElementById('result').innerHTML = 'Loading...';
 
-            Promise.all([getOsmGreenAreas(lat, lon), getWeather(lat, lon)]).then(([greenAreas, weather]) => {
+            getOsmGreenAreas(lat, lon).then(greenAreas => {
                 const exposureHours = ((walk + bike) / 5) * (greenAreas / 10);
                 const benefit = (walk + bike) * 10;
                 totalPoints += (walk + bike) * 5; // Gamification: 5 Punkte pro km
@@ -74,7 +60,6 @@
 
                 document.getElementById('result').innerHTML = `Green Exposure: ${exposureHours.toFixed(2)} hours<br>
                     Health Benefit: ${benefit}%<br>
-                    Current Weather: ${weather}<br>
                     Points: ${totalPoints}, Level: ${level}, Badge: ${badge}`;
             }).catch(error => {
                 console.error('Error:', error);
