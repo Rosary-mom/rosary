@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kneipps fünf Säulen · ROSARY</title>
+<!--
+  Einbett-Widget für ein Wix-HTML-Element (Code einbetten → Code) auf der Seite Think Tank.
+  Ersetzt den Wix-Repeater: sechs Karten im Stil Magnifica Humanitas.
+  Fünf Säulen nach Sebastian Kneipp, plus die Ergänzung „Gebet“ aus der Praxis von
+  Uwe Rosenkranz (nicht Kneipp zuzuschreiben). Texte unverändert aus
+  docs/kneipp-saeulen-start.csv und docs/kneipp-saeulen-rosenkranz-nachtrag.csv.
+  Datenschutz: keine Netzwerkaufrufe, keine Cookies, kein Speicher. Logo als Data-URI.
+-->
+<style>
+  :root {
+    --sand: #efe6d6;
+    --sand2: #e6d9c2;
+    --kern: #f6efe2;
+    --bord: #6b1028;
+    --gold: #b8902f;
+    --ink: #2b211c;
+    --muted: #4a3c36;
+    --f-text: Rosario, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", "Liberation Serif", "Noto Serif", serif;
+    --f-head: "Rockwell Extra Bold", Rockwell, "Roboto Slab", Palatino, Georgia, "Liberation Serif", serif;
+    --f-quote: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", "Liberation Serif", serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--sand);
+    color: var(--ink);
+    font-family: var(--f-text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 22px 18px 20px;
+  }
+  header.mast {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  header.mast img {
+    display: block;
+    width: min(280px, 80vw);
+    height: auto;
+    margin: 0 auto 14px;
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+  }
+  header.mast h1 {
+    margin: 0 0 6px;
+    color: var(--bord);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+    letter-spacing: .04em;
+    line-height: 1.2;
+  }
+  header.mast .rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px auto 12px;
+    max-width: 26rem;
+  }
+  header.mast .rule::before,
+  header.mast .rule::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--gold);
+  }
+  header.mast .rule i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border: 1px solid var(--gold);
+    transform: rotate(45deg);
+    background: transparent;
+  }
+  header.mast .lead {
+    margin: 0 auto;
+    max-width: 38rem;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 16px 14px;
+    background: linear-gradient(180deg, var(--kern) 0%, var(--sand) 52%, var(--sand2) 100%);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    box-shadow: 0 1px 0 rgba(184,144,47,.18), 0 6px 16px rgba(43,33,28,.06);
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .card { transition: transform .22s ease, box-shadow .22s ease; }
+    .card:hover, .card:focus-within {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 26px rgba(43,33,28,.14), 0 0 0 1px var(--gold);
+    }
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .mark {
+    position: relative;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    color: var(--bord);
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    background: var(--kern);
+  }
+  .mark svg { width: 22px; height: 22px; display: block; }
+  .mark .num {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--bord);
+    color: var(--kern);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: 10px;
+    line-height: 18px;
+    text-align: center;
+  }
+  .card h2 {
+    margin: 0;
+    color: var(--bord);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: 1.22rem;
+    letter-spacing: .03em;
+    line-height: 1.15;
+  }
+  .lbl {
+    display: block;
+    margin: 0 0 3px;
+    color: var(--bord);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .block { margin: 0 0 10px; }
+  .block p { margin: 0; }
+  details {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid rgba(184,144,47,.45);
+  }
+  details[open] { padding-bottom: 4px; }
+  details + details { margin-top: 8px; }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    color: var(--bord);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: .82rem;
+    letter-spacing: .04em;
+    padding: 4px 0;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: "▸";
+    display: inline-block;
+    margin-right: 6px;
+    color: var(--gold);
+    transition: transform .15s ease;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  summary:focus-visible {
+    outline: 2px solid var(--bord);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .quote {
+    margin: 8px 0 0;
+    padding: 8px 10px 8px 12px;
+    background: var(--kern);
+    border-left: 2px solid var(--gold);
+    font-family: var(--f-quote);
+    font-style: italic;
+    font-size: .92rem;
+    line-height: 1.55;
+  }
+  .quote .lbl { font-style: normal; }
+  .card-plus { padding-top: 0; }
+  .badge {
+    margin: 0 -16px 12px;
+    padding: 8px 12px 7px;
+    background: var(--bord);
+    color: var(--kern);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: .7rem;
+    letter-spacing: .05em;
+    line-height: 1.35;
+    text-align: center;
+    text-transform: uppercase;
+    border-radius: 9px 9px 0 0;
+  }
+  .badge span { display: block; letter-spacing: .08em; }
+  .card-plus .mark { color: var(--gold); background: var(--bord); border-color: var(--gold); }
+  .note {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: .86rem;
+  }
+  footer.hwg {
+    margin: 22px 2px 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--gold);
+    color: var(--muted);
+    font-style: italic;
+    font-size: .78rem;
+    line-height: 1.45;
+  }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+    .wrap { padding: 16px 12px 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, summary::before { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="mast">
+      <img src="data:image/jpeg;base64,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" width="240" height="53" alt="ROSARY Logo">
+      <h1>Kneipps fünf Säulen</h1>
+      <div class="rule" aria-hidden="true"><i></i></div>
+      <p class="lead">Alltagsimpulse zu Wasser, Bewegung, Ernährung, Heilpflanzen und Lebensordnung. Darunter eine Ergänzung aus der Praxis – nicht Teil der Lehre Kneipps.</p>
+    </header>
+
+    <div class="grid">
+      <article class="card" aria-labelledby="s1">
+        <div class="card-head">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 7.1 6 11.1A6 6 0 1 1 6 14.1C6 10.1 12 3 12 3z"/></svg>
+            <span class="num">1</span>
+          </span>
+          <h2 id="s1">Wasser</h2>
+        </div>
+        <div class="block"><span class="lbl">Tagesimpuls</span><p>Heute bewusst ein Glas Wasser trinken und einen Moment innehalten.</p></div>
+        <div class="block"><span class="lbl">Übung</span><p>Stelle ein Glas Wasser bereit. Trinke es langsam, ohne nebenbei auf den Bildschirm zu schauen.</p></div>
+        <details>
+          <summary>Zeugnis und Rosenkranz-Impuls</summary>
+          <blockquote class="quote"><span class="lbl">Zeugnis:</span> Kneipp schreibt in der Einleitung zu „Meine Wasser-Kur“ (Kösel, Kempten 1886): Als Student badete er im Winter 1849 in Dillingen zwei- bis dreimal wöchentlich einige Augenblicke in der Donau; Schaden habe die Übung nie gebracht. Später in München sei er „mehr und mehr erstarkt“ und Priester geworden. Spätere Darstellungen deuten die damalige Erkrankung als Lungenerkrankung, vermutlich Tuberkulose. Historisches Selbstzeugnis, kein Heilungsversprechen.</blockquote>
+          <blockquote class="quote"><span class="lbl">Rosenkranz-Impuls:</span> Bete heute ein Gesätz der lichtreichen Geheimnisse: „Jesus, der uns das Reich Gottes verkündet hat.“ Lege bei jedem Ave eine Person in Gottes Hand, die gerade einen unsicheren Schritt tut – im Vertrauen, nicht als Kur.</blockquote>
+        </details>
+      </article>
+
+      <article class="card" aria-labelledby="s2">
+        <div class="card-head">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2"/><path d="M12 6.8v5.4M12 8.2l-4.4 3.2M12 8.4l4 2.6M12 12.2l-3.6 6.2M12 12.2l3.2 6"/></svg>
+            <span class="num">2</span>
+          </span>
+          <h2 id="s2">Bewegung</h2>
+        </div>
+        <div class="block"><span class="lbl">Tagesimpuls</span><p>Heute ein paar Schritte mehr tun als sonst – schon ein kurzer Spaziergang zählt.</p></div>
+        <div class="block"><span class="lbl">Übung</span><p>Geh fünf bis zehn Minuten an die frische Luft oder strecke dich behutsam am offenen Fenster.</p></div>
+        <details>
+          <summary>Rosenkranz-Impuls</summary>
+          <blockquote class="quote"><span class="lbl">Rosenkranz-Impuls:</span> Nimm den Rosenkranz als Weg: In den Rosarien-Plänen wird der Gebetsweg als Spur durch den Garten gedacht, etwa als Rosenkranzweg zur Kapelle. Geh heute ein Gesätz langsam, Schritt für Schritt, und lass die Bewegung selbst zum Gebet werden.</blockquote>
+        </details>
+      </article>
+
+      <article class="card" aria-labelledby="s3">
+        <div class="card-head">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V9"/><path d="M12 9c-3.2-1.2-4.6-4.4-4.6-4.4C9.4 4.6 12 6 12 9z"/><path d="M12 9c3.2-1.2 4.6-4.4 4.6-4.4C14.6 4.6 12 6 12 9z"/><path d="M12 13c-3.2-1-4.8-3.6-4.8-3.6C9.2 9.4 12 10.8 12 13z"/><path d="M12 13c3.2-1 4.8-3.6 4.8-3.6C14.8 9.4 12 10.8 12 13z"/><path d="M12 17c-3-1-4.6-3.2-4.6-3.2C9.2 13.8 12 15 12 17z"/><path d="M12 17c3-1 4.6-3.2 4.6-3.2C14.8 13.8 12 15 12 17z"/><path d="M12 5.2V3"/></svg>
+            <span class="num">3</span>
+          </span>
+          <h2 id="s3">Ernährung</h2>
+        </div>
+        <div class="block"><span class="lbl">Tagesimpuls</span><p>Heute eine Mahlzeit in Ruhe einnehmen und wirklich schmecken.</p></div>
+        <div class="block"><span class="lbl">Übung</span><p>Setze dich zum Essen hin. Lege zwischen den Bissen die Gabel ab und nimm dir Zeit.</p></div>
+        <details>
+          <summary>Rosenkranz-Impuls</summary>
+          <blockquote class="quote"><span class="lbl">Rosenkranz-Impuls:</span> Bete heute ein Gesätz der glorreichen Geheimnisse – Jesus, der in die Herrlichkeit des Vaters einzieht. Bei jedem Ave: „Gut ist der Herr, seine Gnade ist ewig.“</blockquote>
+        </details>
+      </article>
+
+      <article class="card" aria-labelledby="s4">
+        <div class="card-head">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20C5 11 11 5 20 5 20 14 14 20 5 20z"/><path d="M5 20c2-6 6-10 12-12"/></svg>
+            <span class="num">4</span>
+          </span>
+          <h2 id="s4">Heilpflanzen</h2>
+        </div>
+        <div class="block"><span class="lbl">Tagesimpuls</span><p>Heute eine vertraute Kräuterteepause einlegen – als kleine Auszeit, nicht als Behandlung.</p></div>
+        <div class="block"><span class="lbl">Übung</span><p>Bereite eine Tasse Kräutertee nach deinem Geschmack zu und trinke sie ohne Eile. Bei Unverträglichkeiten oder Unsicherheit frage eine Fachperson.</p></div>
+        <details>
+          <summary>Rosenkranz-Impuls</summary>
+          <blockquote class="quote"><span class="lbl">Rosenkranz-Impuls:</span> Bete heute ein Gesätz der freudigen Geheimnisse, besonders die Menschwerdung. Bei jedem Ave: „Danke, dass du mich wunderbar gemacht hast.“ Die Rose im Rosarium ist hier Zeichen des Gebets, kein Heilmittel.</blockquote>
+        </details>
+      </article>
+
+      <article class="card" aria-labelledby="s5">
+        <div class="card-head">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.5V12l3.2 2.2"/></svg>
+            <span class="num">5</span>
+          </span>
+          <h2 id="s5">Lebensordnung</h2>
+        </div>
+        <div class="block"><span class="lbl">Tagesimpuls</span><p>Heute dem Tag eine kleine, feste Ordnung geben: Anfang, Pause, Abschluss.</p></div>
+        <div class="block"><span class="lbl">Übung</span><p>Wähle eine feste Uhrzeit für eine kurze Pause ohne Bildschirm. Halte sie heute einmal ein.</p></div>
+        <details>
+          <summary>Rosenkranz-Impuls</summary>
+          <blockquote class="quote"><span class="lbl">Rosenkranz-Impuls:</span> Der Rosenkranz verbindet tägliche Betrachtung mit Gemeinschaft. Kneipp wirkte ab 1855 als Beichtvater und Hausgeistlicher der Dominikanerinnen in Wörishofen; in ihrer Klosterkirche zeigt ein Seitenaltar die Überreichung des Rosenkranzes an Dominikus und Katharina von Siena, und Fresken veranschaulichen die Geheimnisse des Rosenkranzgebets. Nimm dir heute fest eine kurze Zeit für ein Gesätz.</blockquote>
+        </details>
+      </article>
+
+      <article class="card card-plus" aria-labelledby="s6">
+        <p class="badge">Ergänzung aus der Praxis<span>von Uwe Rosenkranz</span></p>
+        <div class="card-head">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.4v8.2M8.6 5.4h6.8"/><circle cx="12" cy="11.4" r=".85" fill="currentColor" stroke="none"/><circle cx="12" cy="16.8" r="5" stroke-dasharray="0.2 2.7" stroke-width="1.9"/></svg>
+          </span>
+          <h2 id="s6">Gebet</h2>
+        </div>
+        <p class="note">Nicht Teil der fünf Säulen Kneipps.</p>
+        <div class="block"><span class="lbl">Tagesimpuls</span><p>Heute eine Anwendung im Gebet begleiten.</p></div>
+        <div class="block"><span class="lbl">Übung</span><p>Während eines Wannenbads oder einer längeren Anwendung (30 bis 60 Minuten) in Ruhe einen Rosenkranz beten, Gesätz für Gesätz.</p></div>
+      </article>
+    </div>
+
+    <footer class="hwg">** Hinweis gemäß Heilmittelwerbegesetz (HWG): Die Inhalte und Erfahrungsberichte zu Abt Sebastian Kneipp sind historische Zeugnisse und allgemeine Alltagsimpulse. Sie sind kein Heilungsversprechen und ersetzen keine ärztliche Beratung. Bei Beschwerden Arzt aufsuchen, im Notfall 112.</footer>
+  </div>
+</body>
+</html>
