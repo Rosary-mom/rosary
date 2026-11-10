@@ -14,7 +14,7 @@ Branch: `think-tank-kneipp` · Seite im Repo: `src/pages/Team.bzld2.js` (= Seite
 
 1. **Seelenmassage** (bestehendes Widget – bleibt oben, unverändert)
 2. **Daily Green – Kneipp-Chat** (neu: Eingabe, Button, Antwort, Datenschutzhinweis)
-3. **Kneipp-Säulen** (neu: CMS-Repeater, optional Tagesimpuls des Tages)
+3. **Kneipp-Säulen** (neu: CMS-Repeater, optionales Zeugnis, HWG-Hinweis unter dem Repeater, optional Tagesimpuls des Tages)
 4. **Daily-Green-Tagesrechner** (neu: HTML-Element mit `embeds/daily-green-kneipp.html`)
 5. **Organigramm-Widget** (neu: HTML-Element mit der monitor-Adresse)
 6. **CHIMERA – „Wartezimmer-Ecke“** (bestehendes Spiel – ganz nach unten verschieben)
@@ -66,6 +66,7 @@ für redaktionelle Impulse gedacht, nicht für Gesundheits-, Patienten- oder Ger
 | `bild` | Bild | Bild | nein |
 | `reihenfolge` | Reihenfolge | Zahl | ja |
 | `aktiv` | Aktiv | Boolean (Ja/Nein) | ja |
+| `zeugnis` | Zeugnis | Text (plain, kein Rich Text) | nein – optionales historisches Kneipp-Zeugnis pro Säule |
 
 ### 2b · Berechtigungen
 
@@ -83,12 +84,16 @@ Die fünf Säulen (Wasser, Bewegung, Ernährung, Heilpflanzen, Lebensordnung) li
 `docs/kneipp-saeulen-start.csv`
 
 1. In der Sammlung **Importieren** wählen und diese CSV hochladen.
-2. Spalten den Feld-IDs zuordnen: `title`, `tagesimpuls`, `uebung`, `bild`, `reihenfolge`, `aktiv`.
+2. Spalten den Feld-IDs zuordnen: `title`, `tagesimpuls`, `uebung`, `bild`, `reihenfolge`, `aktiv`, `zeugnis`.
 3. Die Spalte `bild` ist absichtlich leer – Bilder später direkt im CMS ergänzen.
-4. Prüfen, dass `aktiv` bei allen fünf Einträgen auf „ja/true“ steht und `reihenfolge` 1–5 ist.
+4. Die Spalte `zeugnis` ist nur bei der Säule **Wasser** vorausgefüllt (historisches Selbstzeugnis Kneipps
+   aus der Einleitung zu *Meine Wasser-Kur*, 1886). Die anderen Säulen bleiben leer, solange keine
+   ebenso belegte Quelle vorliegt. Nichts erfinden, keine Patientennamen, keine Heilversprechen.
+5. Prüfen, dass `aktiv` bei allen fünf Einträgen auf „ja/true“ steht und `reihenfolge` 1–5 ist.
 
-Die Texte sind kurze, allgemeine Alltagsimpulse. Sie sind **keine medizinische Beratung** und enthalten
-keine Heilversprechen. Bei Unsicherheit oder Beschwerden gilt weiterhin: Ärztin oder Arzt fragen.
+Die Texte sind kurze, allgemeine Alltagsimpulse und – wo vorhanden – historische Zeugnisse.
+Sie sind **keine medizinische Beratung** und enthalten keine Heilversprechen.
+Bei Unsicherheit oder Beschwerden gilt weiterhin: Ärztin oder Arzt fragen.
 
 ### 2d · Repeater und optionales Textfeld auf der Seite
 
@@ -102,10 +107,16 @@ Unter dem Daily-Green-Chat eine neue Sektion einfügen, z. B. mit der Überschri
 | Tagesimpuls | Text (im Repeater-Item) | `kImpuls` | Feld `tagesimpuls` |
 | Übung | Text (im Repeater-Item) | `kUebung` | Feld `uebung` |
 | Bild | Bild (im Repeater-Item) | `kBild` | Feld `bild`; fehlt ein Bild, wird das Element eingeklappt |
+| Zeugnis | Text (im Repeater-Item, optional) | `kZeugnis` | Feld `zeugnis`; der Code setzt den Vorsatz „Zeugnis:“. Ist das Feld leer, wird das Element eingeklappt |
+| HWG-Hinweis | Text (einmal unter dem Repeater, optional) | `kHinweis` | Wird vom Code gesetzt. Im Editor **klein und kursiv** setzen (z. B. Schriftgröße 12–14, Kursiv). |
 | Tagesimpuls des Tages | Text (außerhalb des Repeaters, optional) | `kTagesimpuls` | Rotiert nach dem Kalenderdatum durch die aktiven Einträge |
 
+Der fest hinterlegte Hinweis lautet:
+
+> ** Hinweis gemäß Heilmittelwerbegesetz (HWG): Die Inhalte und Erfahrungsberichte zu Abt Sebastian Kneipp sind historische Zeugnisse und allgemeine Alltagsimpulse. Sie sind kein Heilungsversprechen und ersetzen keine ärztliche Beratung. Bei Beschwerden Arzt aufsuchen, im Notfall 112.
+
 Der Code sortiert nach `reihenfolge` aufsteigend und zeigt nur Einträge mit `aktiv = true`.
-Fehlen Sammlung oder Elemente, stürzt die Seite nicht ab – es erscheint nur eine Warnung in der Konsole.
+Fehlen Sammlung oder Elemente (auch `#kHinweis` oder `#kZeugnis`), stürzt die Seite nicht ab – es erscheint nur eine Warnung in der Konsole.
 
 ### 2e · Paket `@wix/data`
 
@@ -162,6 +173,8 @@ xAI-Console ein Ausgabelimit setzen.
    - Frage eingeben → „Fragen“ → Antwort erscheint (zuerst „Daily Green denkt nach …“).
    - Frage nach Beschwerden → Antwort verweist an Ärztin/Arzt, keine Diagnose.
    - Repeater zeigt die fünf aktiven Säulen in der Reihenfolge 1–5.
+   - Bei Wasser erscheint unter der Übung das historische Zeugnis (Vorsatz „Zeugnis:“); bei den anderen Säulen bleibt `#kZeugnis` leer bzw. eingeklappt.
+   - Unter dem Repeater erscheint `#kHinweis` klein und kursiv mit dem HWG-Text (kein Heilungsversprechen).
    - Optional: `#kTagesimpuls` zeigt den Impuls des Tages.
    - Tagesrechner: Häkchen setzen → „Auswerten“ → Punkte und Anregung.
    - Organigramm lädt.
@@ -182,7 +195,8 @@ Erst wenn der Test passt: **Veröffentlichen**. Vorher nichts live schalten.
   Verweis an Ärztin/Arzt bzw. Notruf 112. Wir speichern und loggen keine Eingaben.
 - `src/pages/Team.bzld2.js` – verbindet `#grokInput`, `#grokSend`, `#grokAnswer`, `#grokHinweis`
   und liest die CMS-Sammlung `KneippSaeulen` (nur lesen, `@wix/data`) in `#kneippRepeater`
-  (`#kSaeule`, `#kImpuls`, `#kUebung`, `#kBild`) sowie optional `#kTagesimpuls`.
+  (`#kSaeule`, `#kImpuls`, `#kUebung`, `#kBild`, optional `#kZeugnis` für Feld `zeugnis`)
+  sowie optional `#kTagesimpuls` und `#kHinweis` (HWG-Hinweis, einmal unter dem Repeater).
   Fehlen Elemente oder die Sammlung, läuft die Seite weiter (nur Hinweis in der Konsole).
   Chat und Rechner bleiben CMS-frei; es werden keine Besuchereingaben gespeichert.
 - `embeds/daily-green-kneipp.html` – eigenständiger Tagesrechner für ein HTML-Element.

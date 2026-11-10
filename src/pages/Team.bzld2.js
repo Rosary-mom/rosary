@@ -11,7 +11,9 @@
 //   #kImpuls          – Text im Repeater-Item: Tagesimpuls
 //   #kUebung          – Text im Repeater-Item: Übung
 //   #kBild            – Bild im Repeater-Item
+//   #kZeugnis         – optional: Text im Repeater-Item: historisches Zeugnis (Feld zeugnis), Vorsatz „Zeugnis:“
 //   #kTagesimpuls     – optional: Tagesimpuls des Tages (außerhalb des Repeaters)
+//   #kHinweis         – optional: Text unter dem Repeater, HWG-Hinweis (wird vom Code gesetzt)
 // Fehlt ein Element oder die Sammlung, läuft die Seite trotzdem weiter (kein Absturz).
 // Chat und Tagesrechner bleiben CMS-frei. Es werden keine Besuchereingaben gespeichert.
 
@@ -20,6 +22,9 @@ import { items } from '@wix/data';
 
 const MAX_INPUT_CHARS = 1000;
 const KNEIPP_COLLECTION = 'KneippSaeulen';
+
+const HWG_HINWEIS_TEXT =
+    '** Hinweis gemäß Heilmittelwerbegesetz (HWG): Die Inhalte und Erfahrungsberichte zu Abt Sebastian Kneipp sind historische Zeugnisse und allgemeine Alltagsimpulse. Sie sind kein Heilungsversprechen und ersetzen keine ärztliche Beratung. Bei Beschwerden Arzt aufsuchen, im Notfall 112.';
 
 const HINWEIS_TEXT =
     'Datenschutzhinweis: Deine Frage wird zur Beantwortung an den KI-Dienst xAI (Grok) übermittelt ' +
@@ -120,6 +125,9 @@ function setupChat() {
 async function setupKneippCms() {
     const repeater = el('#kneippRepeater');
     const tagesimpulsEl = el('#kTagesimpuls');
+    const hwgHinweis = el('#kHinweis');
+
+    setText(hwgHinweis, HWG_HINWEIS_TEXT);
 
     if (!repeater && !tagesimpulsEl) {
         console.warn('Kneipp-CMS: Elemente fehlen (#kneippRepeater, #kTagesimpuls). Anzeige übersprungen.');
@@ -134,6 +142,7 @@ async function setupKneippCms() {
             const impuls = itemEl($item, '#kImpuls');
             const uebung = itemEl($item, '#kUebung');
             const bild = itemEl($item, '#kBild');
+            const zeugnisEl = itemEl($item, '#kZeugnis');
 
             if (!missingItemWarned && !saeule && !impuls && !uebung && !bild) {
                 missingItemWarned = true;
@@ -143,6 +152,21 @@ async function setupKneippCms() {
             setText(saeule, data.title || '');
             setText(impuls, data.tagesimpuls || '');
             setText(uebung, data.uebung || '');
+
+            const zeugnis = String(data.zeugnis || '').trim();
+            if (zeugnisEl) {
+                try {
+                    if (zeugnis) {
+                        setText(zeugnisEl, 'Zeugnis: ' + zeugnis);
+                        if (typeof zeugnisEl.expand === 'function') zeugnisEl.expand();
+                    } else {
+                        setText(zeugnisEl, '');
+                        if (typeof zeugnisEl.collapse === 'function') zeugnisEl.collapse();
+                    }
+                } catch (err) {
+                    console.warn('Kneipp-CMS: Zeugnis im Repeater konnte nicht gesetzt werden.', err);
+                }
+            }
 
             if (bild) {
                 const src = imageSrc(data.bild);
