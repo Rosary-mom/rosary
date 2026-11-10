@@ -6,7 +6,7 @@
 //   #grokSend         – Button "Fragen"
 //   #grokAnswer       – Textelement für die Antwort
 //   #grokHinweis      – Textelement mit dem Datenschutzhinweis
-//   #kneippRepeater   – Repeater für die CMS-Sammlung KneippSaeulen
+//   #kneippRepeater   – Repeater für die CMS-Sammlung Import1 (Kneipp-Säulen)
 //   #kSaeule          – Text im Repeater-Item: Säule (Feld title)
 //   #kImpuls          – Text im Repeater-Item: Tagesimpuls
 //   #kUebung          – Text im Repeater-Item: Übung
@@ -21,7 +21,7 @@ import { sendMessageToXAI } from 'backend/xaiChat.web';
 import { items } from '@wix/data';
 
 const MAX_INPUT_CHARS = 1000;
-const KNEIPP_COLLECTION = 'KneippSaeulen';
+const KNEIPP_COLLECTION = 'Import1'; // Anzeigename im CMS: Kneipp-Säulen
 
 const HWG_HINWEIS_TEXT =
     '** Hinweis gemäß Heilmittelwerbegesetz (HWG): Die Inhalte und Erfahrungsberichte zu Abt Sebastian Kneipp sind historische Zeugnisse und allgemeine Alltagsimpulse. Sie sind kein Heilungsversprechen und ersetzen keine ärztliche Beratung. Bei Beschwerden Arzt aufsuchen, im Notfall 112.';
@@ -194,7 +194,7 @@ async function setupKneippCms() {
             .find();
         rows = Array.isArray(results && results.items) ? results.items : [];
     } catch (err) {
-        console.warn('Kneipp-CMS: Sammlung KneippSaeulen nicht lesbar oder fehlt.', err);
+        console.warn('Kneipp-CMS: Sammlung Import1 (Kneipp-Säulen) nicht lesbar oder fehlt.', err);
         return;
     }
 

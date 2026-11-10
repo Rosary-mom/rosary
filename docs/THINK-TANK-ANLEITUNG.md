@@ -54,7 +54,7 @@ für redaktionelle Impulse gedacht, nicht für Gesundheits-, Patienten- oder Ger
 ### 2a · Sammlung anlegen
 
 1. Im Editor oder Dashboard das **CMS** öffnen und eine **neue Sammlung** anlegen.
-2. **Sammlungs-ID** (Collection ID, im Code verwendet): `KneippSaeulen` – genau so, ohne Leerzeichen, Groß-/Kleinschreibung beachten.
+2. **Sammlungs-ID** (im Code verwendet): `Import1` – beim CSV-Import von Wix vergeben und nicht änderbar; Anzeigename „Kneipp-Säulen“.
 3. Anzeigename beliebig, z. B. „Kneipp-Säulen“.
 4. Felder exakt mit diesen IDs und Typen anlegen (die Anzeigenamen dürfen so heißen wie in der Spalte „Anzeige“):
 
@@ -194,7 +194,7 @@ Erst wenn der Test passt: **Veröffentlichen**. Vorher nichts live schalten.
   Systemprompt: „Daily Green“ nach Kneipps 5 Säulen, **keine Diagnosen/Behandlungen**, bei Beschwerden
   Verweis an Ärztin/Arzt bzw. Notruf 112. Wir speichern und loggen keine Eingaben.
 - `src/pages/Team.bzld2.js` – verbindet `#grokInput`, `#grokSend`, `#grokAnswer`, `#grokHinweis`
-  und liest die CMS-Sammlung `KneippSaeulen` (nur lesen, `@wix/data`) in `#kneippRepeater`
+  und liest die CMS-Sammlung `Import1` „Kneipp-Säulen“ (nur lesen, `@wix/data`) in `#kneippRepeater`
   (`#kSaeule`, `#kImpuls`, `#kUebung`, `#kBild`, optional `#kZeugnis` für Feld `zeugnis`)
   sowie optional `#kTagesimpuls` und `#kHinweis` (HWG-Hinweis, einmal unter dem Repeater).
   Fehlen Elemente oder die Sammlung, läuft die Seite weiter (nur Hinweis in der Konsole).
