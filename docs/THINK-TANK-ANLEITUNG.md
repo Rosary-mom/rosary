@@ -14,7 +14,7 @@ Branch: `think-tank-kneipp` · Seite im Repo: `src/pages/Team.bzld2.js` (= Seite
 
 1. **Seelenmassage** (bestehendes Widget – bleibt oben, unverändert)
 2. **Daily Green – Kneipp-Chat** (neu: Eingabe, Button, Antwort, Datenschutzhinweis)
-3. **Kneipp-Säulen** (neu: CMS-Repeater, optionales Zeugnis, HWG-Hinweis unter dem Repeater, optional Tagesimpuls des Tages)
+3. **Kneipp-Säulen** (neu: CMS-Repeater, optionales Zeugnis, optionaler Rosenkranz-Impuls, HWG-Hinweis unter dem Repeater, optional Tagesimpuls des Tages)
 4. **Daily-Green-Tagesrechner** (neu: HTML-Element mit `embeds/daily-green-kneipp.html`)
 5. **Organigramm-Widget** (neu: HTML-Element mit der monitor-Adresse)
 6. **CHIMERA – „Wartezimmer-Ecke“** (bestehendes Spiel – ganz nach unten verschieben)
@@ -67,6 +67,7 @@ für redaktionelle Impulse gedacht, nicht für Gesundheits-, Patienten- oder Ger
 | `reihenfolge` | Reihenfolge | Zahl | ja |
 | `aktiv` | Aktiv | Boolean (Ja/Nein) | ja |
 | `zeugnis` | Zeugnis | Text (plain, kein Rich Text) | nein – optionales historisches Kneipp-Zeugnis pro Säule |
+| `rosenkranz` | Rosenkranz-Impuls | Text (plain, kein Rich Text) | nein – optionaler Gebetsimpuls pro Säule |
 
 ### 2b · Berechtigungen
 
@@ -84,12 +85,17 @@ Die fünf Säulen (Wasser, Bewegung, Ernährung, Heilpflanzen, Lebensordnung) li
 `docs/kneipp-saeulen-start.csv`
 
 1. In der Sammlung **Importieren** wählen und diese CSV hochladen.
-2. Spalten den Feld-IDs zuordnen: `title`, `tagesimpuls`, `uebung`, `bild`, `reihenfolge`, `aktiv`, `zeugnis`.
+2. Spalten den Feld-IDs zuordnen: `title`, `tagesimpuls`, `uebung`, `bild`, `reihenfolge`, `aktiv`, `zeugnis`, `rosenkranz`.
 3. Die Spalte `bild` ist absichtlich leer – Bilder später direkt im CMS ergänzen.
 4. Die Spalte `zeugnis` ist nur bei der Säule **Wasser** vorausgefüllt (historisches Selbstzeugnis Kneipps
    aus der Einleitung zu *Meine Wasser-Kur*, 1886). Die anderen Säulen bleiben leer, solange keine
    ebenso belegte Quelle vorliegt. Nichts erfinden, keine Patientennamen, keine Heilversprechen.
-5. Prüfen, dass `aktiv` bei allen fünf Einträgen auf „ja/true“ steht und `reihenfolge` 1–5 ist.
+5. Die Spalte `rosenkranz` ist bei allen fünf Säulen vorausgefüllt (Entwürfe aus `docs/ROSENKRANZ-IMPULS-ENTWURF.md`,
+   nur Impulstext, ohne Quellennoten). Die Texte behaupten nicht, Kneipp habe den Rosenkranz gebetet.
+6. **Wenn die fünf Säulen schon in der Sammlung stehen:** die Start-CSV nicht erneut importieren (sonst entstehen Doppelzeilen).
+   Stattdessen die Texte aus `docs/kneipp-saeulen-rosenkranz-nachtrag.csv` (Spalten `title`,`rosenkranz`) von Hand
+   in das neue Feld `rosenkranz` kopieren.
+7. Prüfen, dass `aktiv` bei allen fünf Einträgen auf „ja/true“ steht und `reihenfolge` 1–5 ist.
 
 Die Texte sind kurze, allgemeine Alltagsimpulse und – wo vorhanden – historische Zeugnisse.
 Sie sind **keine medizinische Beratung** und enthalten keine Heilversprechen.
@@ -102,12 +108,13 @@ Unter dem Daily-Green-Chat eine neue Sektion einfügen, z. B. mit der Überschri
 
 | Element | Typ im Editor | ID (ohne #) | Hinweis |
 |---|---|---|---|
-| Repeater | Repeater / Wiederholungsliste | `kneippRepeater` | Im Repeater-Item die vier Kind-Elemente unten anlegen |
+| Repeater | Repeater / Wiederholungsliste | `kneippRepeater` | Im Repeater-Item die Kind-Elemente unten anlegen |
 | Säulenname | Text (im Repeater-Item) | `kSaeule` | Wird mit Feld `title` befüllt |
 | Tagesimpuls | Text (im Repeater-Item) | `kImpuls` | Feld `tagesimpuls` |
 | Übung | Text (im Repeater-Item) | `kUebung` | Feld `uebung` |
 | Bild | Bild (im Repeater-Item) | `kBild` | Feld `bild`; fehlt ein Bild, wird das Element eingeklappt |
 | Zeugnis | Text (im Repeater-Item, optional) | `kZeugnis` | Feld `zeugnis`; der Code setzt den Vorsatz „Zeugnis:“. Ist das Feld leer, wird das Element eingeklappt |
+| Rosenkranz-Impuls | Text (im Repeater-Item, optional) | `kRosenkranz` | Feld `rosenkranz`; der Code setzt den Vorsatz „Rosenkranz-Impuls:“. Ist das Feld leer, wird das Element eingeklappt. Fehlt das Element, stürzt die Seite nicht ab. |
 | HWG-Hinweis | Text (einmal unter dem Repeater, optional) | `kHinweis` | Wird vom Code gesetzt. Im Editor **klein und kursiv** setzen (z. B. Schriftgröße 12–14, Kursiv). |
 | Tagesimpuls des Tages | Text (außerhalb des Repeaters, optional) | `kTagesimpuls` | Rotiert nach dem Kalenderdatum durch die aktiven Einträge |
 
@@ -116,9 +123,35 @@ Der fest hinterlegte Hinweis lautet:
 > ** Hinweis gemäß Heilmittelwerbegesetz (HWG): Die Inhalte und Erfahrungsberichte zu Abt Sebastian Kneipp sind historische Zeugnisse und allgemeine Alltagsimpulse. Sie sind kein Heilungsversprechen und ersetzen keine ärztliche Beratung. Bei Beschwerden Arzt aufsuchen, im Notfall 112.
 
 Der Code sortiert nach `reihenfolge` aufsteigend und zeigt nur Einträge mit `aktiv = true`.
-Fehlen Sammlung oder Elemente (auch `#kHinweis` oder `#kZeugnis`), stürzt die Seite nicht ab – es erscheint nur eine Warnung in der Konsole.
+Fehlen Sammlung oder Elemente (auch `#kHinweis`, `#kZeugnis` oder `#kRosenkranz`), stürzt die Seite nicht ab – es erscheint nur eine Warnung in der Konsole.
 
-### 2e · Paket `@wix/data`
+### 2e · Design der Repeater-Karten (Magnifica Humanitas)
+
+Das Aussehen stellst du direkt im Editor ein; der Code füllt nur die Texte und ändert am Design nichts.
+Tokens aus den aktuellen Blogposts und dem Stylesheet „Design Magnifica Humanitas“ (Details: `docs/DESIGN-MAGNIFICA-HUMANITAS.md`):
+
+| Rolle | Wert |
+|---|---|
+| Bordeaux (Überschriften) | `#6b1028` |
+| Sand (Hintergrund) | `#efe6d6` |
+| Sand 2 (Karten) | `#e6d9c2` |
+| Gold (Rahmen oder Linie) | `#b8902f` |
+| Textfarbe | `#2b211c` |
+| Fließtext | Rosario |
+| Überschriften | Rockwell Extra Bold (Fallback: Rockwell / Roboto Slab) |
+| Zitate | Palatino |
+| Logo | [ROSARY-Logo 22.08.2025](https://rosary-mom.github.io/Bio2.0/assets/Rosary%20LOGO%2022.08.2025.png) |
+
+Vorschlag für die Karte:
+
+- `#kSaeule` in Rockwell Extra Bold, Bordeaux `#6b1028`.
+- `#kImpuls`, `#kUebung` und `#kRosenkranz` in Rosario (Zitate in Palatino) auf sandfarbenem Grund `#efe6d6` / `#e6d9c2`, Textfarbe `#2b211c`.
+- Goldener Rahmen oder eine goldene Linie (`#b8902f`) um jede Karte.
+- Das ROSARY-Logo als festes Bild in der Repeater-Karte (am besten ID `kLogo`); dann erscheint es bei allen fünf Säulen. Datei aus den Wix-Medien wählen oder über den Link oben laden. Der Code braucht diese ID nicht.
+
+„Paladine“ ist der Name der Edition, keine eigene Schrift.
+
+### 2f · Paket `@wix/data`
 
 Der Seitencode liest die Sammlung über die aktuelle Data-Items-SDK (`import { items } from '@wix/data'`).
 Das Paket steht in `package.json`. Nach dem Merge im Editor unter **Paket-Manager / npm** prüfen,
@@ -174,6 +207,7 @@ xAI-Console ein Ausgabelimit setzen.
    - Frage nach Beschwerden → Antwort verweist an Ärztin/Arzt, keine Diagnose.
    - Repeater zeigt die fünf aktiven Säulen in der Reihenfolge 1–5.
    - Bei Wasser erscheint unter der Übung das historische Zeugnis (Vorsatz „Zeugnis:“); bei den anderen Säulen bleibt `#kZeugnis` leer bzw. eingeklappt.
+   - Bei allen fünf Säulen erscheint `#kRosenkranz` mit dem Vorsatz „Rosenkranz-Impuls:“. Ist das Feld leer oder fehlt das Element, bleibt die Seite stabil (leeres Feld = eingeklappt).
    - Unter dem Repeater erscheint `#kHinweis` klein und kursiv mit dem HWG-Text (kein Heilungsversprechen).
    - Optional: `#kTagesimpuls` zeigt den Impuls des Tages.
    - Tagesrechner: Häkchen setzen → „Auswerten“ → Punkte und Anregung.
@@ -195,10 +229,13 @@ Erst wenn der Test passt: **Veröffentlichen**. Vorher nichts live schalten.
   Verweis an Ärztin/Arzt bzw. Notruf 112. Wir speichern und loggen keine Eingaben.
 - `src/pages/Team.bzld2.js` – verbindet `#grokInput`, `#grokSend`, `#grokAnswer`, `#grokHinweis`
   und liest die CMS-Sammlung `Import1` „Kneipp-Säulen“ (nur lesen, `@wix/data`) in `#kneippRepeater`
-  (`#kSaeule`, `#kImpuls`, `#kUebung`, `#kBild`, optional `#kZeugnis` für Feld `zeugnis`)
+  (`#kSaeule`, `#kImpuls`, `#kUebung`, `#kBild`, optional `#kZeugnis` für Feld `zeugnis`,
+  optional `#kRosenkranz` für Feld `rosenkranz` mit Vorsatz „Rosenkranz-Impuls:“)
   sowie optional `#kTagesimpuls` und `#kHinweis` (HWG-Hinweis, einmal unter dem Repeater).
   Fehlen Elemente oder die Sammlung, läuft die Seite weiter (nur Hinweis in der Konsole).
   Chat und Rechner bleiben CMS-frei; es werden keine Besuchereingaben gespeichert.
 - `embeds/daily-green-kneipp.html` – eigenständiger Tagesrechner für ein HTML-Element.
-- `docs/kneipp-saeulen-start.csv` – Startinhalte für den CMS-Import der fünf Säulen.
+- `docs/kneipp-saeulen-start.csv` – Startinhalte für den CMS-Import der fünf Säulen (inkl. Spalte `rosenkranz`).
+- `docs/kneipp-saeulen-rosenkranz-nachtrag.csv` – nur `title`,`rosenkranz`, zum Abtippen ins CMS, wenn die Säulen schon importiert sind.
+- `docs/ROSENKRANZ-IMPULS-ENTWURF.md` – Entwürfe mit Quellen; `docs/DESIGN-MAGNIFICA-HUMANITAS.md` – Farb- und Schrift-Tokens.
 - Die alten losen Dateien im Repo-Root (`GROK-chat`, `Daily Green Exposure Estimator`, `*.html`) bleiben unverändert.

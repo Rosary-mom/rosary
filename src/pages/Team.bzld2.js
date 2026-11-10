@@ -12,6 +12,7 @@
 //   #kUebung          – Text im Repeater-Item: Übung
 //   #kBild            – Bild im Repeater-Item
 //   #kZeugnis         – optional: Text im Repeater-Item: historisches Zeugnis (Feld zeugnis), Vorsatz „Zeugnis:“
+//   #kRosenkranz      – optional: Text im Repeater-Item: Rosenkranz-Impuls (Feld rosenkranz), Vorsatz „Rosenkranz-Impuls:“
 //   #kTagesimpuls     – optional: Tagesimpuls des Tages (außerhalb des Repeaters)
 //   #kHinweis         – optional: Text unter dem Repeater, HWG-Hinweis (wird vom Code gesetzt)
 // Fehlt ein Element oder die Sammlung, läuft die Seite trotzdem weiter (kein Absturz).
@@ -143,6 +144,7 @@ async function setupKneippCms() {
             const uebung = itemEl($item, '#kUebung');
             const bild = itemEl($item, '#kBild');
             const zeugnisEl = itemEl($item, '#kZeugnis');
+            const rosenkranzEl = itemEl($item, '#kRosenkranz');
 
             if (!missingItemWarned && !saeule && !impuls && !uebung && !bild) {
                 missingItemWarned = true;
@@ -165,6 +167,21 @@ async function setupKneippCms() {
                     }
                 } catch (err) {
                     console.warn('Kneipp-CMS: Zeugnis im Repeater konnte nicht gesetzt werden.', err);
+                }
+            }
+
+            const rosenkranz = String(data.rosenkranz || '').trim();
+            if (rosenkranzEl) {
+                try {
+                    if (rosenkranz) {
+                        setText(rosenkranzEl, 'Rosenkranz-Impuls: ' + rosenkranz);
+                        if (typeof rosenkranzEl.expand === 'function') rosenkranzEl.expand();
+                    } else {
+                        setText(rosenkranzEl, '');
+                        if (typeof rosenkranzEl.collapse === 'function') rosenkranzEl.collapse();
+                    }
+                } catch (err) {
+                    console.warn('Kneipp-CMS: Rosenkranz-Impuls im Repeater konnte nicht gesetzt werden.', err);
                 }
             }
 
