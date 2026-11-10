@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "@wix/data": "^1.0.185"
+  },
   "devDependencies": {
     "@wix/cli": "^1.0.0",
     "@wix/eslint-plugin-cli": "^1.0.0",

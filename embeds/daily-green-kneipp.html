@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Green – Tagesrechner nach Kneipps 5 Säulen · ROSARY</title>
+<!--
+  Einbett-Widget für ein Wix-HTML-Element (Code einbetten → Code).
+  Weiterentwicklung von daily_green_exposure_estimator.html (Original bleibt unverändert im Repo).
+  Datenschutz: Alles wird nur im Browser berechnet. Keine Netzwerkaufrufe, keine Cookies,
+  kein localStorage, keine Standortabfrage, keine Gesundheitsdaten.
+  Bewusst ohne Zahlen zu "Gesundheitsnutzen" oder CO2, weil dafür keine belegte Quelle vorliegt.
+-->
+<style>
+  :root { --gruen:#2e7d32; --hell:#e8f5e9; --text:#1b2a1e; }
+  * { box-sizing:border-box; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; margin:0; padding:16px; color:var(--text); background:#fafdf9; }
+  h2 { margin:0 0 4px; color:var(--gruen); font-size:1.3rem; }
+  p.sub { margin:0 0 14px; font-size:.9rem; }
+  fieldset { border:1px solid #c8e6c9; border-radius:10px; margin:0 0 10px; padding:8px 12px; background:#fff; }
+  legend { font-weight:600; color:var(--gruen); padding:0 4px; }
+  label { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:6px 0; font-size:.95rem; }
+  input[type=number] { width:80px; padding:4px 6px; border:1px solid #a5d6a7; border-radius:6px; }
+  input[type=checkbox] { width:18px; height:18px; }
+  button { margin-top:6px; padding:8px 16px; background:var(--gruen); color:#fff; border:0; border-radius:8px; font-size:1rem; cursor:pointer; }
+  button:focus-visible { outline:3px solid #81c784; }
+  #ergebnis { margin-top:14px; padding:12px; border-radius:10px; background:var(--hell); display:none; }
+  .bar { height:10px; background:#c8e6c9; border-radius:5px; overflow:hidden; margin:2px 0 8px; }
+  .bar span { display:block; height:100%; background:var(--gruen); }
+  small.hinweis { display:block; margin-top:12px; font-size:.78rem; color:#4e5d50; }
+</style>
+</head>
+<body>
+  <h2>Daily Green – dein grüner Tag</h2>
+  <p class="sub">Ein kleiner Tagesrückblick nach Sebastian Kneipps fünf Säulen. Ehrlich ankreuzen, Punkte sammeln, eine Anregung mitnehmen.</p>
+
+  <form id="f" onsubmit="return false;">
+    <fieldset><legend>Wasser</legend>
+      <label>Leitungswasser statt Flaschenwasser getrunken <input type="checkbox" id="w1"></label>
+      <label>Wasser bewusst gespart (z. B. kürzer geduscht) <input type="checkbox" id="w2"></label>
+    </fieldset>
+    <fieldset><legend>Bewegung</legend>
+      <label>Kilometer zu Fuß <input type="number" id="b1" min="0" max="100" step="0.5" value="0"></label>
+      <label>Kilometer mit dem Rad <input type="number" id="b2" min="0" max="300" step="0.5" value="0"></label>
+    </fieldset>
+    <fieldset><legend>Ernährung</legend>
+      <label>Mahlzeiten mit regionalen oder saisonalen Zutaten <input type="number" id="e1" min="0" max="10" step="1" value="0"></label>
+      <label>Lebensmittel gerettet statt weggeworfen <input type="checkbox" id="e2"></label>
+    </fieldset>
+    <fieldset><legend>Heilpflanzen &amp; Natur</legend>
+      <label>Minuten draußen im Grünen <input type="number" id="h1" min="0" max="1440" step="5" value="0"></label>
+      <label>Pflanzen gepflegt (Garten, Balkon, Fensterbank) <input type="checkbox" id="h2"></label>
+    </fieldset>
+    <fieldset><legend>Lebensordnung</legend>
+      <label>Bewusste Pause ohne Bildschirm <input type="checkbox" id="l1"></label>
+      <label>Den Tag in Ruhe ausklingen lassen <input type="checkbox" id="l2"></label>
+    </fieldset>
+    <button type="button" id="los">Auswerten</button>
+  </form>
+
+  <div id="ergebnis" role="status" aria-live="polite"></div>
+
+  <small class="hinweis">Nur zur Selbstreflexion – kein medizinischer Rat. Alle Angaben bleiben in deinem Browser, nichts wird gespeichert oder gesendet. Bei Beschwerden wende dich an deine Ärztin oder deinen Arzt.</small>
+
+<script>
+(function () {
+  function num(id, max) {
+    var v = parseFloat(document.getElementById(id).value);
+    if (!isFinite(v) || v < 0) v = 0;
+    return Math.min(v, max);
+  }
+  function chk(id) { return document.getElementById(id).checked; }
+
+  var tipps = {
+    'Wasser': 'Kneipp begann beim Wasser: Fülle dir morgens eine Karaffe mit Leitungswasser.',
+    'Bewegung': 'Erledige einen kurzen Weg heute zu Fuß oder mit dem Rad.',
+    'Ernährung': 'Schau beim nächsten Einkauf, was gerade Saison hat und aus der Region kommt.',
+    'Heilpflanzen & Natur': 'Gönn dir zehn Minuten im nächsten Park oder unter einem Baum.',
+    'Lebensordnung': 'Plane eine feste, bildschirmfreie Viertelstunde in deinen Tag ein.'
+  };
+
+  function auswerten() {
+    // Je Säule maximal 20 Punkte, zusammen 100.
+    var s = {
+      'Wasser': (chk('w1') ? 10 : 0) + (chk('w2') ? 10 : 0),
+      'Bewegung': Math.min(20, Math.round(num('b1', 100) * 3 + num('b2', 300) * 1.5)),
+      'Ernährung': Math.min(20, num('e1', 10) * 5 + (chk('e2') ? 5 : 0)),
+      'Heilpflanzen & Natur': Math.min(20, Math.round(num('h1', 1440) / 3) + (chk('h2') ? 5 : 0)),
+      'Lebensordnung': (chk('l1') ? 10 : 0) + (chk('l2') ? 10 : 0)
+    };
+    var summe = 0, schwach = null, html = '';
+    Object.keys(s).forEach(function (k) {
+      summe += s[k];
+      if (schwach === null || s[k] < s[schwach]) schwach = k;
+      html += '<div>' + k + ': ' + s[k] + ' / 20</div><div class="bar"><span style="width:' + (s[k] * 5) + '%"></span></div>';
+    });
+    var stufe = summe >= 80 ? 'Kneipp-Kenner' : summe >= 50 ? 'Grüner Entdecker' : 'Guter Anfang';
+    var box = document.getElementById('ergebnis');
+    box.innerHTML = '<strong>' + summe + ' von 100 Punkten · ' + stufe + '</strong><br><br>' + html +
+      '<strong>Anregung für morgen (' + schwach + '):</strong> ' + tipps[schwach];
+    box.style.display = 'block';
+  }
+  document.getElementById('los').addEventListener('click', auswerten);
+})();
+</script>
+</body>
+</html>
